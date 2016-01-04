@@ -28,73 +28,73 @@ using Nitro.Rom;
 
 namespace NitroFilcher
 {
-	class MainClass
-	{
-		public static void Main(string[] args)
-		{
-			args = new string[] {
-				"/home/benito/Ninokuni [PATCHED].nds",
-				"/home/benito/nino.txt",
-				"/home/benito/output.txt"
-			};
+    class MainClass
+    {
+        public static void Main(string[] args)
+        {
+            args = new [] {
+                "/home/benito/Ninokuni [PATCHED].nds",
+                "/home/benito/nino.txt",
+                "/home/benito/output.txt"
+            };
 
-			DataStream romStream = new DataStream(args[0], FileMode.Open, FileAccess.Read);
-			GameFile rom = new GameFile("Game.nds", romStream);
-			Format romFormat = new Rom();
-			romFormat.Initialize(rom);
-			romFormat.Read();
+            DataStream romStream = new DataStream(args[0], FileMode.Open, FileAccess.Read);
+            GameFile rom = new GameFile("Game.nds", romStream);
+            Format romFormat = new Rom();
+            romFormat.Initialize(rom);
+            romFormat.Read();
 
-			ExportFiles(rom, args[1], args[2]);
-		}
+            ExportFiles(rom, args[1], args[2]);
+        }
 
-		private static void ExportFiles(GameFile rom, string listAddress, string outputFile)
-		{
-			string[] entries = File.ReadAllLines(listAddress);
-			List<string> files = new List<string>();
+        private static void ExportFiles(FileContainer rom, string listAddress, string outputFile)
+        {
+            string[] entries = File.ReadAllLines(listAddress);
+            List<string> files = new List<string>();
 
-			int x = Console.CursorLeft;
-			int y = Console.CursorTop;
-			for (int i = 0; i < entries.Length; i++) {
-				Console.SetCursorPosition(x, y);
-				Console.WriteLine("Analyzing {0:06} of {1:06} ({2:F2})",
-					i, entries.Length, i * 100.0 / entries.Length);
+            int x = Console.CursorLeft;
+            int y = Console.CursorTop;
+            for (int i = 0; i < entries.Length; i++) {
+                Console.SetCursorPosition(x, y);
+                Console.WriteLine("Analyzing {0:06} of {1:06} ({2:F2})",
+                    i, entries.Length, i * 100.0 / entries.Length);
 
-				string f = ExportFile(rom, entries[i]);
-				if (!string.IsNullOrEmpty(f) && !files.Contains(f))
-					files.Add(f);
-			}
+                string f = ExportFile(rom, entries[i]);
+                if (!string.IsNullOrEmpty(f) && !files.Contains(f))
+                    files.Add(f);
+            }
 
-			File.WriteAllLines(outputFile, files);
-		}
+            File.WriteAllLines(outputFile, files);
+        }
 
-		private static string ExportFile(GameFile rom, string entry)
-		{
-			string[] fields = entry.Split(',');
-			uint offset = Convert.ToUInt32(fields[0], 16);
-			int size = Convert.ToInt32(fields[1], 16);
+        private static string ExportFile(FileContainer rom, string entry)
+        {
+            string[] fields = entry.Split(',');
+            uint offset = Convert.ToUInt32(fields[0], 16);
+            int size = Convert.ToInt32(fields[1], 16);
 
-			return SearchFile(rom, offset, size);
-		}
+            return SearchFile(rom, offset, size);
+        }
 
-		private static string SearchFile(FileContainer folder, long offset, int size)
-		{
-			foreach (var file in folder.Files.Cast<GameFile>())
-				if (IsContained(file, offset, size))
-					return file.Path;
+        private static string SearchFile(FileContainer folder, long offset, int size)
+        {
+            foreach (var file in folder.Files.Cast<GameFile>())
+                if (IsContained(file, offset, size))
+                    return file.Path;
 
-			foreach (var subfolder in folder.Folders) {
-				var result = SearchFile(subfolder, offset, size);
-				if (!string.IsNullOrEmpty(result))
-					return result;
-			}
+            foreach (var subfolder in folder.Folders) {
+                var result = SearchFile(subfolder, offset, size);
+                if (!string.IsNullOrEmpty(result))
+                    return result;
+            }
 
-			return string.Empty;
-		}
+            return string.Empty;
+        }
 
-		private static bool IsContained(GameFile file, long offset, int size)
-		{
-			long endOffset = file.Stream.Position + file.Stream.Length;
-			return (offset >= file.Stream.Position) && (offset + size <= endOffset);
-		}
-	}
+        private static bool IsContained(GameFile file, long offset, int size)
+        {
+            long endOffset = file.Stream.Position + file.Stream.Length;
+            return (offset >= file.Stream.Position) && (offset + size <= endOffset);
+        }
+    }
 }
