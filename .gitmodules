@@ -1,0 +1,6 @@
+[submodule "libs/libgame"]
+	path = libs/libgame
+	url = https://github.com/pleonex/libgame
+[submodule "libs/modime"]
+	path = libs/modime
+	url = https://github.com/pleonex/modime
