@@ -19,12 +19,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Libgame;
-using Libgame.IO;
-using Nitro.Rom;
 using System.Threading;
 
 namespace NitroFilcher
@@ -33,21 +27,35 @@ namespace NitroFilcher
     {
         public static void Main(string[] args)
         {
-            const string romPath = "/home/benito/Ninokuni [PATCHED].nds";
+            if (args.Length != 1) {
+                Console.WriteLine("USAGE: NitroFilcher.exe ROM_PATH");
+                return;
+            }
 
+            string romPath = args[0];
+
+            // Create the resolve (it will parse the ROM file)
             var resolver = new FileResolver(romPath);
+
+            // Create the desmume process and start it.
             var desmume = new DesmumeProcess(romPath, resolver);
             desmume.Start();
 
+            // Start the resolver thread
             Thread resolverThread = new Thread(new ThreadStart(resolver.StartProcessing));
             resolverThread.Start();
 
+            // Block the main thread with the desmume process.
             desmume.WaitForExit();
 
+            // Once we have closed desmume, request to the resolver thread to stop
+            // when there are no more messages to parse. Wait for that.
             resolver.Stop();
             resolverThread.Join();
 
-            resolver.Export("/home/benito/nino.txt");
+            // Export the output file.
+            string outputFilename = "ninokuni" + DateTime.Now.ToBinary() + ".txt";
+            resolver.Export(outputFilename);
         }
     }
 }
