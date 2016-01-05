@@ -18,7 +18,7 @@ cd desmume
 # "Apply" our patch replacing the debug file
 # Since that file it's just a template for debug
 # stuff it should be safe to replace, but yeah, I should generate a patch
-cp debug.cpp desmume/src/
+cp ../../debug.cpp src/
 
 # Configure enabling debug
 ./configure --enable-debug
