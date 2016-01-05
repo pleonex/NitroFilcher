@@ -43,8 +43,6 @@ u32 debugFlag;
 const bool debug_acl = true;
 const bool debug_cacheMiss = false;
 
-FILE *log_ptr = fopen("nino.txt", "a");
-
 static bool acl_check_access(u32 adr, u32 access) {
 
 	//non-user modes get separate access handling, so check that here
@@ -101,28 +99,19 @@ void HandleDebugEvent_Execute()
 	//		NDS_debug_break();
 	//	}
 	//}
-	return;
     extern bool nds_debug_continuing[2];
     if (nds_debug_continuing[DebugEventData.procnum]) {
         nds_debug_continuing[DebugEventData.procnum] = false;
         return;
     }
 
-    if (DebugEventData.addr == 0x02016DE0 && log_ptr != NULL) {
+	nds_debug_continuing[DebugEventData.procnum] = true;
+    if (DebugEventData.addr == 0x02016DE0) {
 		u32 addr = DebugEventData.cpu()->R[2];
 		u32 size = DebugEventData.cpu()->R[3];
-		fprintf(log_ptr, "%08X,%08X,%08X\n", addr, size, addr + size);
+		printf("NITROFILCHER: %08X,%08X\n", addr, size);
+		fflush(stdout);
 	}
-
-    //if (DebugEventData.addr >> 24 == 0x04) {
-    //    nds_debug_continuing[DebugEventData.procnum] = true;
-    //    printf("Ha sido en %04x\n\n\n\n", DebugEventData.addr);
-    //}
-
-	//if (DebugEventData.addr == 0x02009B78 && (DebugEventData.cpu()->R[2] >> 24) == 0x22) {
-	//	nds_debug_continuing[DebugEventData.procnum] = true;
-	//	printf("Valor %04x\n", DebugEventData.cpu()->R[2]);
-	//}
 }
 
 void HandleDebugEvent_CacheMiss()
