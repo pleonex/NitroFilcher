@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
+using System.IO;
+using System.Reflection;
 using System.Threading;
 
 namespace NitroFilcher
@@ -54,8 +56,9 @@ namespace NitroFilcher
             resolverThread.Join();
 
             // Export the output file.
+            string cwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string outputFilename = "ninokuni" + DateTime.Now.ToBinary() + ".txt";
-            resolver.Export(outputFilename);
+            resolver.Export(Path.Combine(cwd, outputFilename));
         }
     }
 }
