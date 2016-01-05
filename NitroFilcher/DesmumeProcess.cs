@@ -60,14 +60,11 @@ namespace NitroFilcher
             // Redirect the output
             desmume.StartInfo.UseShellExecute = false;
             desmume.StartInfo.RedirectStandardOutput = true;
-            desmume.StartInfo.RedirectStandardError = true;
             desmume.OutputDataReceived += ProcessOutput;
-            desmume.ErrorDataReceived += ProcessOutput;
 
             // Start the process and the output reading
             bool result = desmume.Start();
             desmume.BeginOutputReadLine();
-            desmume.BeginErrorReadLine();
 
             return result;
         }
@@ -77,7 +74,7 @@ namespace NitroFilcher
             desmume.WaitForExit();
         }
 
-        void ProcessOutput(object sender, DataReceivedEventArgs e)
+        private void ProcessOutput(object sender, DataReceivedEventArgs e)
         {
             Console.WriteLine("LOG: {0}", e.Data);
         }
