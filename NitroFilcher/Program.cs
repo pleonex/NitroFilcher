@@ -32,6 +32,11 @@ namespace NitroFilcher
     {
         public static void Main(string[] args)
         {
+            var d = new DesmumeProcess("/home/benito/Ninokuni [PATCHED].nds");
+            d.Start();
+            d.WaitForExit();
+            return;
+
             args = new [] {
                 "/home/benito/Ninokuni [PATCHED].nds",
                 "/home/benito/nino.txt",
