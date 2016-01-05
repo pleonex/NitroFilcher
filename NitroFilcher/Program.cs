@@ -25,6 +25,7 @@ using System.Linq;
 using Libgame;
 using Libgame.IO;
 using Nitro.Rom;
+using System.Threading;
 
 namespace NitroFilcher
 {
@@ -32,74 +33,21 @@ namespace NitroFilcher
     {
         public static void Main(string[] args)
         {
-            var d = new DesmumeProcess("/home/benito/Ninokuni [PATCHED].nds");
-            d.Start();
-            d.WaitForExit();
-            return;
+            const string romPath = "/home/benito/Ninokuni [PATCHED].nds";
 
-            args = new [] {
-                "/home/benito/Ninokuni [PATCHED].nds",
-                "/home/benito/nino.txt",
-                "/home/benito/output.txt"
-            };
+            var resolver = new FileResolver(romPath);
+            var desmume = new DesmumeProcess(romPath, resolver);
+            desmume.Start();
 
-            DataStream romStream = new DataStream(args[0], FileMode.Open, FileAccess.Read);
-            GameFile rom = new GameFile("Game.nds", romStream);
-            Format romFormat = new Rom();
-            romFormat.Initialize(rom);
-            romFormat.Read();
+            Thread resolverThread = new Thread(new ThreadStart(resolver.StartProcessing));
+            resolverThread.Start();
 
-            ExportFiles(rom, args[1], args[2]);
-        }
+            desmume.WaitForExit();
 
-        private static void ExportFiles(FileContainer rom, string listAddress, string outputFile)
-        {
-            string[] entries = File.ReadAllLines(listAddress);
-            List<string> files = new List<string>();
+            resolver.Stop();
+            resolverThread.Join();
 
-            int x = Console.CursorLeft;
-            int y = Console.CursorTop;
-            for (int i = 0; i < entries.Length; i++) {
-                Console.SetCursorPosition(x, y);
-                Console.WriteLine("Analyzing {0:06} of {1:06} ({2:F2})",
-                    i, entries.Length, i * 100.0 / entries.Length);
-
-                string f = ExportFile(rom, entries[i]);
-                if (!string.IsNullOrEmpty(f) && !files.Contains(f))
-                    files.Add(f);
-            }
-
-            File.WriteAllLines(outputFile, files);
-        }
-
-        private static string ExportFile(FileContainer rom, string entry)
-        {
-            string[] fields = entry.Split(',');
-            uint offset = Convert.ToUInt32(fields[0], 16);
-            int size = Convert.ToInt32(fields[1], 16);
-
-            return SearchFile(rom, offset, size);
-        }
-
-        private static string SearchFile(FileContainer folder, long offset, int size)
-        {
-            foreach (var file in folder.Files.Cast<GameFile>())
-                if (IsContained(file, offset, size))
-                    return file.Path;
-
-            foreach (var subfolder in folder.Folders) {
-                var result = SearchFile(subfolder, offset, size);
-                if (!string.IsNullOrEmpty(result))
-                    return result;
-            }
-
-            return string.Empty;
-        }
-
-        private static bool IsContained(GameFile file, long offset, int size)
-        {
-            long endOffset = file.Stream.Position + file.Stream.Length;
-            return (offset >= file.Stream.Position) && (offset + size <= endOffset);
+            resolver.Export("/home/benito/nino.txt");
         }
     }
 }

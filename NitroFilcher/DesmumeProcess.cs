@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.IO;
 
@@ -30,11 +29,13 @@ namespace NitroFilcher
     {
         private const string DefaultProcessName = "desmume_nitrofilcher.exe";
 
-        private string gamePath;
+        private readonly FileResolver resolver;
+        private readonly string gamePath;
         private Process desmume;
 
-        public DesmumeProcess(string gamePath)
+        public DesmumeProcess(string gamePath, FileResolver resolver)
         {
+            this.resolver = resolver;
             this.gamePath = gamePath;
             ProcessName = DefaultProcessName;
         }
@@ -76,7 +77,9 @@ namespace NitroFilcher
 
         private void ProcessOutput(object sender, DataReceivedEventArgs e)
         {
-            Console.WriteLine("LOG: {0}", e.Data);
+            const string Prefix = "NITROFILCHER: ";
+            if (e.Data.StartsWith(Prefix))
+                resolver.Enqueue(e.Data.Substring(Prefix.Length));
         }
     }
 }
