@@ -12,7 +12,7 @@ fi
 
 # Run the pre-steps
 # Yes, there is a desmume folder inside the root folder
-cd desmume 
+cd desmume
 ./autogen.sh
 
 # "Apply" our patch replacing the debug file
@@ -21,10 +21,14 @@ cd desmume
 cp ../../debug.cpp src/
 
 # Configure enabling debug
-./configure --enable-debug
+./configure --enable-debug --enable-developer
 
 # Make
-make
+if [[ -z "$1" ]] ; then
+    make
+else
+    make -j$1
+fi
 
 # We are not install but copying the executable
 cd ../..
