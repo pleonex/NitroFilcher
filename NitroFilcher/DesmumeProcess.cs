@@ -51,8 +51,8 @@ namespace NitroFilcher
             // Set the program and argument
             desmume.StartInfo.FileName = ProcessName;
             desmume.StartInfo.Arguments = "\"" + gamePath + "\"";
-            desmume.StartInfo.WorkingDirectory = 
-                Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
+            desmume.StartInfo.WorkingDirectory =
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             // Show error dialog if the process fail to start
             desmume.StartInfo.ErrorDialog = true;
