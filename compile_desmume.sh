@@ -10,15 +10,13 @@ else
     svn update
 fi
 
+# Apply our patch
+patch -p0 -i ../patch.diff
+
 # Run the pre-steps
 # Yes, there is a desmume folder inside the root folder
 cd desmume
 ./autogen.sh
-
-# "Apply" our patch replacing the debug file
-# Since that file it's just a template for debug
-# stuff it should be safe to replace, but yeah, I should generate a patch
-cp ../../debug.cpp src/
 
 # Configure enabling debug
 ./configure --enable-debug --enable-developer
