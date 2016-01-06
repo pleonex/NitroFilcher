@@ -34,16 +34,31 @@ namespace NitroFilcher
                 return;
             }
 
+            // Check that the file exists
             string romPath = args[0];
+            if (!File.Exists(romPath)) {
+                Console.WriteLine("ERROR: The ROM file does not exist.");
+                return;
+            }
+
+            if (Path.GetExtension(romPath) != ".nds") {
+                Console.WriteLine("ERROR: Invalid file extension. It must be .nds");
+                return;
+            }
 
             // Create the resolve (it will parse the ROM file)
+            Console.WriteLine("Reading ROM file...");
             var resolver = new FileResolver(romPath);
 
             // Create the desmume process and start it.
+            Console.WriteLine("Starting DeSmuME emulator...");
+            Console.WriteLine("\tPlay until you reach the scene you want.");
+            Console.WriteLine("\tThe program will parse the files read by the game.");
+            Console.WriteLine("\tWhen you are done, close the emulator (DeSmuME).");
             var desmume = new DesmumeProcess(romPath, resolver);
             desmume.Start();
 
-            // Start the resolver thread
+            // Start the resolver thread (files may be already enqueued but no problem).
             Thread resolverThread = new Thread(new ThreadStart(resolver.StartProcessing));
             resolverThread.Start();
 
@@ -54,6 +69,10 @@ namespace NitroFilcher
             // when there are no more messages to parse. Wait for that.
             resolver.Stop();
             resolverThread.Join();
+
+            Console.WriteLine();
+            Console.WriteLine("DeSmuME closed.");
+            Console.WriteLine("Writing output file...");
 
             // Export the output file.
             string cwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

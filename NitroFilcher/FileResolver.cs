@@ -127,8 +127,8 @@ namespace NitroFilcher
 
             int x = Console.CursorLeft;
             int y = Console.CursorTop;
-            Console.WriteLine("Analyzed {0:06} entries.{1}",
-                count, new String('.', count % 3));
+            Console.WriteLine("Analyzed {0:000000} entries. Unique files: {1:000000}",
+                count, filenames.Count);
             Console.SetCursorPosition(x, y);   
         }
     }
