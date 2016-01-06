@@ -78,7 +78,7 @@ namespace NitroFilcher
         private void ProcessOutput(object sender, DataReceivedEventArgs e)
         {
             const string Prefix = "NITROFILCHER: ";
-            if (e.Data.StartsWith(Prefix))
+            if (e.Data != null && e.Data.StartsWith(Prefix))
                 resolver.Enqueue(e.Data.Substring(Prefix.Length));
         }
     }

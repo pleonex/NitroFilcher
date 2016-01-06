@@ -4,7 +4,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{F9D82C93-1F81-4440-9C3A-440666696A80}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>NitroFilcher</RootNamespace>
     <AssemblyName>NitroFilcher</AssemblyName>
     <StartupObject>NitroFilcher.MainClass</StartupObject>
