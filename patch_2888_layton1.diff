@@ -1,0 +1,108 @@
+Index: desmume/configure.ac
+===================================================================
+--- desmume/configure.ac	(revision 5328)
++++ desmume/configure.ac	(working copy)
+@@ -343,6 +343,9 @@
+ AC_ARG_ENABLE(debug,
+               AC_HELP_STRING(--enable-debug, enable debug information),
+               AC_DEFINE(DEBUG))
++AC_ARG_ENABLE(developer,
++              AC_HELP_STRING(--enable-developer, enable developer information),
++              AC_DEFINE(DEVELOPER))
+ AC_ARG_ENABLE(gpu-debug,
+               AC_HELP_STRING(--enable-gpu-debug, enable gpu debug information),
+               AC_DEFINE(GPUDEBUG))
+Index: desmume/src/debug.cpp
+===================================================================
+--- desmume/src/debug.cpp	(revision 5328)
++++ desmume/src/debug.cpp	(working copy)
+@@ -1,6 +1,7 @@
+ /*
+ 	Copyright (C) 2006 Guillaume Duhamel
+ 	Copyright (C) 2006-2011 DeSmuME team
++	Copyright (C) 2016 Benito Palacios (a.k.a. pleonex)
+ 
+ 	This file is free software: you can redistribute it and/or modify
+ 	it under the terms of the GNU General Public License as published by
+@@ -56,11 +57,6 @@
+ 
+ void HandleDebugEvent_ACL_Exception()
+ {
+-	printf("ACL EXCEPTION!\n");
+-	if(DebugEventData.memAccessType == MMU_AT_CODE)
+-		armcpu_exception(DebugEventData.cpu(),EXCEPTION_PREFETCH_ABORT);
+-	else if(DebugEventData.memAccessType == MMU_AT_DATA)
+-		armcpu_exception(DebugEventData.cpu(),EXCEPTION_DATA_ABORT);
+ }
+ 
+ 
+@@ -85,19 +81,19 @@
+ 
+ void HandleDebugEvent_Execute()
+ {
+-	//HACKY BREAKPOINTS!
+-	//extern bool nds_debug_continuing[2];
+-	//if(!nds_debug_continuing[DebugEventData.procnum]) //dont keep hitting the same breakpoint
+-	//{
+-	//	if((DebugEventData.addr & 0xFFFFFFF0) == 0x02000000)
+-	//	{
+-	//		void NDS_debug_break();
+-	//		NDS_debug_break();
+-	//	}
+-	//}
+-	if(!debug_acl) return;
+-	if(DebugEventData.procnum != ARMCPU_ARM9) return; //acl only valid on arm9
+-	acl_check_access(DebugEventData.addr,CP15_ACCESS_EXECUTE);
++    extern bool nds_debug_continuing[2];
++    if (nds_debug_continuing[DebugEventData.procnum]) {
++        nds_debug_continuing[DebugEventData.procnum] = false;
++        return;
++    }
++
++	nds_debug_continuing[DebugEventData.procnum] = true;
++    if (DebugEventData.addr == 0x020A76EC) {
++		u32 addr = DebugEventData.cpu()->R[1];
++		u32 size = DebugEventData.cpu()->R[3];
++		printf("NITROFILCHER: %08X,%08X\n", addr, size);
++		fflush(stdout);
++	}
+ }
+ 
+ void HandleDebugEvent_CacheMiss()
+Index: desmume/src/debug.h
+===================================================================
+--- desmume/src/debug.h	(revision 5328)
++++ desmume/src/debug.h	(working copy)
+@@ -192,8 +192,6 @@
+ 	return false;
+ #endif
+ 
+-	if(!debugFlag) return false;
+-
+ 	return true;
+ }
+ 
+Index: desmume/src/windows/userconfig/userconfig.h
+===================================================================
+--- desmume/src/windows/userconfig/userconfig.h	(revision 0)
++++ desmume/src/windows/userconfig/userconfig.h	(working copy)
+@@ -0,0 +1,19 @@
++#ifndef _USERCONFIG_H
++#define _USERCONFIG_H
++
++//this is a default file. it should not be edited, or else you will mess up the defaults.
++//to customize your build, place a customized copy in the userconfig directory
++//(alongside this defaultconfig directory)
++
++//disables SSE and SSE2 optimizations (better change it in the vc++ codegen options too)
++//note that you may have to use this if your compiler doesn't support standard SSE intrinsics
++//#define NOSSE
++//#define NOSSE2 
++
++#define DEVELOPER //enables dev+ features
++//#define GDB_STUB //enables the gdb stub. for some reason this is separate from dev+ for now. requires DEVELOPER.
++
++//#define EXPERIMENTAL_WIFI_COMM //enables experimental wifi communication features which do not actually work yet
++//basic wifi register emulation is still enabled, to at least make it seem like the wifi is working in an empty universe
++
++#endif //_USERCONFIG_H
