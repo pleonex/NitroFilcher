@@ -29,13 +29,15 @@ namespace NitroFilcher
     {
         public static void Main(string[] args)
         {
-            if (args.Length != 1) {
-                Console.WriteLine("USAGE: NitroFilcher.exe ROM_PATH");
+            if (args.Length != 2) {
+                Console.WriteLine("USAGE: NitroFilcher.exe ROM_PATH OUTPUT_PREFIX");
                 return;
             }
+                
+            string romPath = args[0];
+            string prefix = args[1];
 
             // Check that the file exists
-            string romPath = args[0];
             if (!File.Exists(romPath)) {
                 Console.WriteLine("ERROR: The ROM file does not exist.");
                 return;
@@ -76,7 +78,7 @@ namespace NitroFilcher
 
             // Export the output file.
             string cwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string outputFilename = "ninokuni" + DateTime.Now.ToBinary() + ".txt";
+            string outputFilename = prefix + DateTime.Now.ToBinary() + ".txt";
             resolver.Export(Path.Combine(cwd, outputFilename));
         }
     }
